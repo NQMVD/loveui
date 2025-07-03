@@ -1,0 +1,30 @@
+[config]
+# Selene configuration for Love2D project
+
+# Exclude generated or temporary files
+exclude = [
+    "build/**",
+    "dist/**",
+    "**/.*",
+]
+
+[lints]
+# Only check for obvious issues, ignore Love2D globals
+unused_variable = "allow"
+unscoped_variables = "allow"
+undefined_variable = "allow"
+global_usage = "allow"
+incorrect_standard_library_use = "allow"
+
+# Critical issues only
+divide_by_zero = "deny"
+duplicate_keys = "deny"
+empty_if = "warn"
+
+# Disable everything else to avoid Love2D conflicts
+shadowing = "allow"
+high_cyclomatic_complexity = "allow"
+mixed_table = "allow"
+if_same_then_else = "allow"
+almost_swapped = "allow"
+deprecated = "allow"

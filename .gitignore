@@ -1,0 +1,43 @@
+# Build directories
+build/
+dist/
+
+# Love2D generated files
+*.love
+love.app/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Icon must end with two \r
+Icon
+
+# Thumbnails
+._*
+
+# Logs
+*.log
+logs/
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.bak
+*.swp
+*~
+
+# Editor directories and files
+.vscode/
+.idea/
+
+# Archive backups
+*.tar.gz
