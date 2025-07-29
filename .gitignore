@@ -41,3 +41,16 @@ temp/
 
 # Archive backups
 *.tar.gz
+
+# Rust build artifacts
+egui-love2d/target/
+egui-love2d/Cargo.lock
+
+# Compiled shared libraries
+*.so
+*.dll
+*.dylib
+
+# Example binary and symlinks
+example/libegui_love2d.*
+example/love2d-egui
