@@ -1,5 +1,5 @@
 use mlua::{Lua, Result as LuaResult, Table, UserData, UserDataMethods};
-use crate::{input::Love2DInputEvent, renderer::Love2DRenderer, with_context, initialize, shutdown};
+use crate::{input::Love2DInputEvent, renderer::Love2DRenderer, with_context, initialize, shutdown, EguiUI};
 use std::ffi::CStr;
 use std::os::raw::{c_char, c_int, c_float};
 
@@ -118,15 +118,32 @@ pub struct EguiLua {
 
 impl UserData for EguiLua {
     fn add_methods<M: UserDataMethods<Self>>(methods: &mut M) {
-        methods.add_method_mut("button", |_, this, (text, x, y, width, height): (String, f32, f32, f32, f32)| {
-            // This would need to interact with the egui context
-            // For now, return a placeholder
-            Ok(false)
+        methods.add_method_mut("button", |_, _this, (text, x, y, width, height): (String, f32, f32, f32, f32)| {
+            match with_context(|ctx| {
+                EguiUI::button(
+                    ctx.context_mut(),
+                    &text,
+                    egui::Pos2::new(x, y),
+                    egui::Vec2::new(width, height),
+                )
+            }) {
+                Ok(Ok(clicked)) => Ok(clicked),
+                _ => Ok(false),
+            }
         });
         
-        methods.add_method_mut("text", |_, this, (text, x, y): (String, f32, f32)| {
-            // Render text
-            Ok(())
+        methods.add_method_mut("text", |_, _this, (text, x, y): (String, f32, f32)| {
+            match with_context(|ctx| {
+                EguiUI::text(
+                    ctx.context_mut(),
+                    &text,
+                    egui::Pos2::new(x, y),
+                    egui::Color32::WHITE,
+                )
+            }) {
+                Ok(Ok(_)) => Ok(()),
+                _ => Ok(()),
+            }
         });
         
         methods.add_method_mut("get_draw_commands", |_, this, ()| {

@@ -8,10 +8,12 @@ mod ffi;
 mod input;
 mod renderer;
 mod errors;
+mod ui;
 
 pub use backend::Love2DBackend;
 pub use context::EguiContext;
 pub use errors::{EguiLove2DError, Result};
+pub use ui::EguiUI;
 
 // Global context for the egui integration
 static GLOBAL_CONTEXT: Lazy<Arc<RwLock<Option<EguiContext>>>> = 
