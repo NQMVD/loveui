@@ -15,6 +15,9 @@ ffi.cdef[[
     int egui_love2d_handle_mouse_button(float x, float y, int button, int pressed);
     int egui_love2d_handle_mouse_move(float x, float y);
     int egui_love2d_handle_wheel(float x, float y);
+    int egui_love2d_button(const char* text, float x, float y, float width, float height);
+    int egui_love2d_text(const char* text, float x, float y);
+    int egui_love2d_get_draw_commands_count();
 ]]
 
 local egui = {}
@@ -175,25 +178,18 @@ function egui.create_ui()
     local ui = {}
     
     function ui:button(text, x, y, width, height)
-        if not initialized then return false end
-        -- This would interface with the Rust egui context
-        -- For now, simulate a simple button click detection
-        local mx, my = love.mouse.getPosition()
-        local clicked = false
+        if not initialized or not lib then return false end
         
-        if love.mouse.isDown(1) then
-            if mx >= x and mx <= x + width and my >= y and my <= y + height then
-                clicked = true
-            end
-        end
-        
-        return clicked
+        -- Call the actual Rust egui button function
+        local result = lib.egui_love2d_button(text, x, y, width, height)
+        return result == 1
     end
     
     function ui:text(text, x, y)
-        if not initialized then return end
-        -- This would interface with the Rust egui context
-        -- For now, just store for rendering
+        if not initialized or not lib then return end
+        
+        -- Call the actual Rust egui text function
+        lib.egui_love2d_text(text, x, y)
     end
     
     return ui
@@ -209,18 +205,27 @@ end
 
 -- Rendering
 function egui.render()
-    if not initialized then return end
+    if not initialized or not lib then return end
     
-    -- In a real implementation, this would:
-    -- 1. Get draw commands from the Rust backend
-    -- 2. Execute them using Love2D graphics functions
-    -- 3. Handle clipping, textures, etc.
+    -- Get the number of draw commands from the Rust backend
+    local command_count = lib.egui_love2d_get_draw_commands_count()
     
-    -- For now, just a placeholder
-    love.graphics.setColor(1, 0, 0, 0.5)
-    love.graphics.rectangle("fill", 10, 10, 200, 100)
-    love.graphics.setColor(1, 1, 1, 1)
-    love.graphics.print("egui placeholder", 20, 20)
+    if command_count > 0 then
+        -- For now, we'll need to implement a more sophisticated way to get
+        -- and execute the draw commands. This is a simplified approach.
+        -- In a full implementation, we would:
+        -- 1. Get draw commands from the Rust backend via FFI
+        -- 2. Convert them to Love2D graphics calls
+        -- 3. Handle clipping, textures, etc.
+        
+        -- Placeholder: Draw a simple indication that egui is working
+        love.graphics.setColor(0.2, 0.3, 0.4, 0.8)
+        love.graphics.rectangle("fill", 90, 90, 140, 40)
+        love.graphics.setColor(0.4, 0.5, 0.6, 1.0)
+        love.graphics.rectangle("line", 90, 90, 140, 40)
+        love.graphics.setColor(1, 1, 1, 1)
+        love.graphics.print("egui active", 100, 105)
+    end
 end
 
 -- Utility functions

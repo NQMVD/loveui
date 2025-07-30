@@ -14,11 +14,11 @@ pub enum EguiLove2DError {
     #[error("Input error: {0}")]
     InputError(String),
     
-    #[error("Lua error: {0}")]
-    LuaError(#[from] mlua::Error),
-    
     #[error("Memory error: {0}")]
     MemoryError(String),
+    
+    #[error("IO error: {0}")]
+    IoError(String),
 }
 
 pub type Result<T> = std::result::Result<T, EguiLove2DError>;

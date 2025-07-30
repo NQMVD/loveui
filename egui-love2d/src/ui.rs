@@ -1,4 +1,4 @@
-use egui::{Context, Vec2, Pos2, Rect, Color32};
+use egui::{Context, Vec2, Pos2, Color32};
 use crate::Result;
 
 /// High-level UI helper functions that work with the egui context
@@ -9,47 +9,16 @@ impl EguiUI {
     pub fn button(ctx: &mut Context, text: &str, pos: Pos2, size: Vec2) -> Result<bool> {
         let mut clicked = false;
         
-        egui::CentralPanel::default().show(ctx, |ui| {
-            // Create a button at the specified position
-            let button_rect = Rect::from_min_size(pos, size);
+        // Create a custom area for the button at the specified position
+        let area = egui::Area::new(format!("button_{}_{}_{}", text, pos.x, pos.y).into())
+            .fixed_pos(pos)
+            .movable(false)
+            .enabled(true)
+            .order(egui::Order::Foreground);
             
-            let response = ui.allocate_rect(button_rect, egui::Sense::click());
-            
-            // Draw button background
-            let bg_color = if response.hovered() {
-                Color32::from_rgb(70, 70, 80)
-            } else {
-                Color32::from_rgb(50, 50, 60)
-            };
-            
-            ui.painter().rect_filled(button_rect, 4.0, bg_color);
-            
-            // Draw button border
-            ui.painter().rect_stroke(
-                button_rect,
-                4.0,
-                egui::Stroke::new(1.0, Color32::from_rgb(100, 100, 110)),
-            );
-            
-            // Draw button text centered
-            let font_id = egui::FontId::default();
-            let text_size = ui.painter().layout_no_wrap(
-                text.to_string(),
-                font_id.clone(),
-                Color32::WHITE,
-            ).size();
-            
-            let text_pos = button_rect.center() - Vec2::new(text_size.x / 2.0, text_size.y / 2.0);
-            
-            ui.painter().text(
-                text_pos,
-                egui::Align2::LEFT_TOP,
-                text,
-                font_id,
-                Color32::WHITE,
-            );
-            
-            if response.clicked() {
+        area.show(ctx, |ui| {
+            ui.set_max_size(size);
+            if ui.button(text).clicked() {
                 clicked = true;
             }
         });
@@ -59,14 +28,15 @@ impl EguiUI {
     
     /// Display text at a specific position
     pub fn text(ctx: &mut Context, text: &str, pos: Pos2, color: Color32) -> Result<()> {
-        egui::CentralPanel::default().show(ctx, |ui| {
-            ui.painter().text(
-                pos,
-                egui::Align2::LEFT_TOP,
-                text,
-                egui::FontId::default(),
-                color,
-            );
+        // Create a custom area for the text at the specified position
+        let area = egui::Area::new(format!("text_{}_{}_{}", text, pos.x, pos.y).into())
+            .fixed_pos(pos)
+            .movable(false)
+            .enabled(false)
+            .order(egui::Order::Background);
+            
+        area.show(ctx, |ui| {
+            ui.colored_label(color, text);
         });
         
         Ok(())

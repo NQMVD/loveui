@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Build script for the egui-Love2D bridge
+# Cross-platform build script for the egui-Love2D bridge
 set -e
 
-echo "Building egui-Love2D bridge..."
+echo "Cross-platform egui-Love2D bridge build script"
 
 # Colors for output
 RED='\033[0;31m'
@@ -11,83 +11,56 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-# Check prerequisites
-echo "Checking prerequisites..."
-
-if ! command -v cargo &> /dev/null; then
-    echo -e "${RED}Error: Rust/Cargo not found. Please install Rust from https://rustup.rs/${NC}"
-    exit 1
-fi
-
-if ! command -v pkg-config &> /dev/null; then
-    echo -e "${YELLOW}Warning: pkg-config not found. Installing...${NC}"
-    sudo apt update && sudo apt install -y pkg-config
-fi
-
-# Check for Lua development libraries
-if ! pkg-config --exists lua5.4; then
-    echo -e "${YELLOW}Warning: Lua 5.4 development libraries not found. Installing...${NC}"
-    sudo apt update && sudo apt install -y liblua5.4-dev
-fi
-
-echo -e "${GREEN}Prerequisites check complete.${NC}"
-
-# Build the Rust library
-echo "Building Rust library..."
-cd egui-love2d
-
-# Clean previous builds
-cargo clean
-
-# Build release version
-echo "Building release version..."
-cargo build --release
-
-if [ $? -eq 0 ]; then
-    echo -e "${GREEN}Rust library built successfully!${NC}"
-else
-    echo -e "${RED}Failed to build Rust library.${NC}"
-    exit 1
-fi
-
-cd ..
-
-# Copy library to example directory for easy testing
-echo "Setting up example..."
+# Detect the operating system
 SYSTEM=$(uname -s)
-if [ "$SYSTEM" = "Linux" ]; then
-    LIB_FILE="libegui_love2d.so"
-elif [ "$SYSTEM" = "Darwin" ]; then
-    LIB_FILE="libegui_love2d.dylib"
-else
-    echo -e "${YELLOW}Unknown system: $SYSTEM. You may need to manually copy the library file.${NC}"
-    LIB_FILE="libegui_love2d.so"
-fi
+echo "Detected system: $SYSTEM"
 
-if [ -f "egui-love2d/target/release/$LIB_FILE" ]; then
-    cp "egui-love2d/target/release/$LIB_FILE" example/
-    echo -e "${GREEN}Library copied to example directory.${NC}"
-else
-    echo -e "${RED}Library file not found: egui-love2d/target/release/$LIB_FILE${NC}"
-fi
+case "$SYSTEM" in
+    Linux*)
+        echo -e "${GREEN}Running Linux build script...${NC}"
+        if [ -f "build-linux.sh" ]; then
+            chmod +x build-linux.sh
+            ./build-linux.sh
+        else
+            echo -e "${RED}Error: build-linux.sh not found${NC}"
+            exit 1
+        fi
+        ;;
+    Darwin*)
+        echo -e "${GREEN}Running macOS build script...${NC}"
+        if [ -f "build-macos.sh" ]; then
+            chmod +x build-macos.sh
+            ./build-macos.sh
+        else
+            echo -e "${RED}Error: build-macos.sh not found${NC}"
+            exit 1
+        fi
+        ;;
+    CYGWIN*|MINGW*|MSYS*)
+        echo -e "${GREEN}Running Windows build script...${NC}"
+        if [ -f "build-windows.ps1" ]; then
+            if command -v powershell &> /dev/null; then
+                powershell -ExecutionPolicy Bypass -File build-windows.ps1
+            else
+                echo -e "${RED}Error: PowerShell not found. Please run build-windows.ps1 manually.${NC}"
+                exit 1
+            fi
+        else
+            echo -e "${RED}Error: build-windows.ps1 not found${NC}"
+            exit 1
+        fi
+        ;;
+    *)
+        echo -e "${YELLOW}Unknown system: $SYSTEM${NC}"
+        echo -e "${YELLOW}Attempting to build with generic Linux script...${NC}"
+        if [ -f "build-linux.sh" ]; then
+            chmod +x build-linux.sh
+            ./build-linux.sh
+        else
+            echo -e "${RED}Error: No suitable build script found${NC}"
+            exit 1
+        fi
+        ;;
+esac
 
-# Create a symlink for the love2d-egui module in the example directory
-if [ ! -L "example/love2d-egui" ]; then
-    ln -s "../love2d-egui" "example/love2d-egui"
-    echo -e "${GREEN}Created symlink for love2d-egui module in example directory.${NC}"
-fi
-
-echo -e "${GREEN}Build complete!${NC}"
-echo ""
-echo "To run the example:"
-echo "  cd example"
-if command -v love &> /dev/null; then
-    echo "  love ."
-else
-    echo "  # Install Love2D first, then run: love ."
-fi
-echo ""
-echo "Library files:"
-echo "  Rust library: egui-love2d/target/release/$LIB_FILE"
-echo "  Lua module: love2d-egui/egui.lua"
-echo "  Example: example/main.lua"
+echo -e "${GREEN}Cross-platform build completed!${NC}"
