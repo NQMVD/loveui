@@ -1,0 +1,27 @@
+[package]
+name = "egui-love2d"
+version = "0.1.0"
+edition = "2021"
+authors = ["Love2D Community"]
+description = "A bridge library enabling egui to work with Love2D"
+license = "MIT"
+
+[lib]
+crate-type = ["cdylib", "staticlib"]
+
+[dependencies]
+egui = "0.29"
+once_cell = "1.20"
+parking_lot = "0.12"
+thiserror = "1.0"
+tracing = { version = "0.1", optional = true }
+
+[features]
+default = []
+debug = ["tracing"]
+lua-integration = []
+
+[profile.release]
+opt-level = 3
+lto = true
+panic = "abort"
